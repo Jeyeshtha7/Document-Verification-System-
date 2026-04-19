@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}AES Encryption Demo — SecureDoc{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="page-header mb-4">
+        <h2 class="text-white"><i class="fas fa-lock me-2 text-success"></i>AES-256-CBC Encryption Demo</h2>
+        <p class="text-muted">Enter any text and see it encrypted using AES-256-CBC with the system's 256-bit key. The same key decrypts it back.</p>
+      </div>
+
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <form method="POST">
+          <label class="form-label text-light fw-semibold">Plaintext to Encrypt</label>
+          <textarea name="plaintext" class="form-control form-dark mb-3" rows="3" placeholder="Enter text here…">{{ result.plaintext if result }}</textarea>
+          <button class="btn btn-success w-100">🔒 Encrypt with AES-256-CBC</button>
+        </form>
+      </div>
+
+      {% if result %}
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <h5 class="text-success mb-3">Encryption Result</h5>
+
+        <div class="crypto-row">
+          <div class="crypto-label">Original Plaintext</div>
+          <div class="crypto-value text-white">{{ result.plaintext }}</div>
+        </div>
+
+        <div class="crypto-row">
+          <div class="crypto-label"><i class="fas fa-lock me-1 text-warning"></i>AES-256-CBC Ciphertext (Base64)</div>
+          <div class="crypto-value hash-display text-warning">{{ result.ciphertext }}</div>
+          <div class="crypto-desc small text-muted">Unreadable without the key. Every encryption produces different ciphertext (due to random IV).</div>
+        </div>
+
+        <div class="crypto-row">
+          <div class="crypto-label">Initialization Vector (IV)</div>
+          <div class="crypto-value hash-display text-info">{{ result.iv }}</div>
+          <div class="crypto-desc small text-muted">Random 16-byte IV ensures semantic security (same plaintext ≠ same ciphertext)</div>
+        </div>
+
+        <div class="crypto-row">
+          <div class="crypto-label">AES Key (preview)</div>
+          <div class="crypto-value hash-display text-danger">{{ result.key_preview }}</div>
+          <div class="crypto-desc small text-muted">256-bit (32-byte) symmetric key — stored securely on server</div>
+        </div>
+
+        <div class="crypto-row">
+          <div class="crypto-label"><i class="fas fa-unlock me-1 text-success"></i>Decrypted Back</div>
+          <div class="crypto-value text-success">{{ result.decrypted }}</div>
+          <div class="crypto-desc small text-muted">AES decryption with same key + IV recovers exact plaintext</div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="info-box p-3 rounded-2 border border-success border-opacity-25">
+        <h6 class="text-success"><i class="fas fa-info-circle me-1"></i>AES-256-CBC Key Facts</h6>
+        <ul class="small text-muted mb-0">
+          <li><strong>AES</strong> — Advanced Encryption Standard (NIST approved)</li>
+          <li><strong>256-bit key</strong> — 2²⁵⁶ possible keys; brute-force infeasible</li>
+          <li><strong>CBC mode</strong> — each block XOR'd with previous ciphertext block</li>
+          <li><strong>Random IV</strong> — prevents identical plaintexts from producing identical ciphertexts</li>
+          <li><strong>PKCS#7 padding</strong> — pads input to 16-byte block boundary</li>
+          <li><strong>Symmetric</strong> — same key for encrypt and decrypt (unlike RSA)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+{% block title %}Verification Result - SecureDoc{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      {% if verified %}
+      <div class="result-banner success mb-4">
+        <div class="banner-icon"><i class="fas fa-check-circle fa-3x text-success"></i></div>
+        <div>
+          <h3 class="text-success mb-1">Document Status: ORIGINAL</h3>
+          <p class="text-muted mb-0">
+            {% if match_basis == "semantic_text_match" %}
+              Document text matches the registered original even though the file container or extension differs.
+            {% else %}
+              Hash comparison matched a registered institutional record.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      {% else %}
+      <div class="result-banner fail mb-4">
+        <div class="banner-icon"><i class="fas fa-triangle-exclamation fa-3x text-danger"></i></div>
+        <div>
+          <h3 class="text-danger mb-1">Document Status: {{ status }}</h3>
+          <p class="text-muted mb-0">
+            {% if analysis %}
+              {% if not analysis.original_text_available or not analysis.uploaded_text_available %}
+                Binary hash mismatch detected, but text extraction was unavailable for one or both files. The result is based on limited structural checks.
+              {% else %}
+                Hash mismatch detected. Deep tamper analysis has been completed.
+              {% endif %}
+            {% else %}
+              No matching registered document was found.
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <h5 class="text-info mb-3"><i class="fas fa-file-shield me-2"></i>Verification Report</h5>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="info-label">Selected Original</div>
+            <div class="info-value">{{ selected_document_name or candidate_name or "Not provided" }}</div>
+          </div>
+          <div class="col-sm-6">
+            <div class="info-label">Document Name</div>
+            <div class="info-value">{{ verification_report.document_name }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-label">Status</div>
+            <div class="info-value">
+              {% if verification_report.status == "Original" %}
+                <span class="badge bg-success">Original</span>
+              {% elif verification_report.status == "Safe" %}
+                <span class="badge bg-info text-dark">Safe</span>
+              {% elif verification_report.status == "Suspicious" %}
+                <span class="badge bg-warning text-dark">Suspicious</span>
+              {% elif verification_report.status == "Fake" %}
+                <span class="badge bg-danger">Fake</span>
+              {% else %}
+                <span class="badge bg-secondary">{{ verification_report.status }}</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-label">Risk Score</div>
+            <div class="info-value"><strong>{{ verification_report.risk_score }}%</strong></div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-label">Metadata Status</div>
+            <div class="info-value">{{ verification_report.metadata_status }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-label">PKI Status</div>
+            <div class="info-value">
+              {% if certificate_valid %}
+                <span class="badge bg-success">Valid</span>
+              {% else %}
+                <span class="badge bg-secondary">Not Validated</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="info-label">Timestamp</div>
+            <div class="info-value">{{ format_timestamp(verification_report.timestamp) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <h5 class="text-warning mb-3"><i class="fas fa-equals me-2"></i>Hash Comparison</h5>
+        <div class="mb-2">
+          <div class="info-label">Uploaded Document Hash</div>
+          <div class="hash-display">{{ uploaded_hash }}</div>
+        </div>
+        <div class="mb-2">
+          <div class="info-label">Registered Hash</div>
+          <div class="hash-display">{{ stored_hash or "Not found" }}</div>
+        </div>
+        <div class="mb-2">
+          <div class="info-label">Uploaded Text Content Hash</div>
+          <div class="hash-display">{{ uploaded_content_hash or "Text extraction unavailable" }}</div>
+        </div>
+        <div class="mb-2">
+          <div class="info-label">Registered Text Content Hash</div>
+          <div class="hash-display">{{ stored_content_hash or "Text extraction unavailable" }}</div>
+        </div>
+        {% if match_basis %}
+        <div class="small text-muted">Verification basis: <strong>{{ match_basis }}</strong></div>
+        {% endif %}
+      </div>
+
+      {% if verified %}
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <h5 class="text-success mb-3"><i class="fas fa-clipboard-check me-2"></i>Verification Checks</h5>
+        <div class="check-list">
+          <div class="check-item pass">
+            <i class="fas fa-check-circle text-success"></i>
+            <div>
+              <strong>{% if match_basis == "semantic_text_match" %}Content Equivalence{% else %}SHA-256 Match{% endif %}</strong>
+              <div class="small text-muted">
+                {% if match_basis == "semantic_text_match" %}
+                  Extracted document text matches the registered original after normalization.
+                {% else %}
+                  Uploaded hash matches blockchain record.
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="check-item {{ 'pass' if signature_valid else 'fail' }}">
+            <i class="fas fa-{{ 'check' if signature_valid else 'times' }}-circle text-{{ 'success' if signature_valid else 'danger' }}"></i>
+            <div>
+              <strong>RSA Signature</strong>
+              <div class="small text-muted">Institution signature verification result.</div>
+            </div>
+          </div>
+          <div class="check-item {{ 'pass' if hmac_valid else 'fail' }}">
+            <i class="fas fa-{{ 'check' if hmac_valid else 'times' }}-circle text-{{ 'success' if hmac_valid else 'danger' }}"></i>
+            <div>
+              <strong>HMAC Integrity</strong>
+              <div class="small text-muted">Message authentication check result.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if analysis %}
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <h5 class="text-danger mb-3"><i class="fas fa-microscope me-2"></i>Tampering Analysis</h5>
+        {% if candidate_name %}
+        <div class="alert alert-warning py-2">
+          Compared against registered original: <strong>{{ candidate_name }}</strong>
+        </div>
+        {% endif %}
+        <div class="row g-3">
+          <div class="col-md-3">
+            <div class="info-label">Content Change</div>
+            <div class="info-value text-danger"><strong>{{ analysis.content_change_pct }}%</strong></div>
+            <div class="small text-muted">diff: {{ analysis.content_diff_length }}/{{ analysis.content_total_length }}</div>
+          </div>
+          <div class="col-md-3">
+            <div class="info-label">Metadata Tampering</div>
+            <div class="info-value"><strong>{{ analysis.metadata_status }}</strong></div>
+          </div>
+          <div class="col-md-3">
+            <div class="info-label">Structure Change</div>
+            <div class="info-value text-warning"><strong>{{ analysis.structure_change_pct }}%</strong></div>
+            <div class="small text-muted">size: {{ analysis.file_size_change_pct }}%</div>
+          </div>
+          <div class="col-md-3">
+            <div class="info-label">Risk Class</div>
+            <div class="info-value"><strong>{{ analysis.classification }}</strong></div>
+          </div>
+        </div>
+
+        {% if analysis.signal_results %}
+        <div class="mt-4">
+          <div class="info-label">Ensemble Security Signals</div>
+          <div class="table-responsive">
+            <table class="table table-dark table-striped table-sm mb-0">
+              <thead>
+                <tr>
+                  <th>Signal</th>
+                  <th>Status</th>
+                  <th>Risk</th>
+                  <th>Weight</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for signal in analysis.signal_results %}
+                <tr>
+                  <td>{{ signal.name }}</td>
+                  <td>{{ signal.status }}</td>
+                  <td>{{ signal.risk if signal.available else "N/A" }}</td>
+                  <td>{{ signal.weight }}</td>
+                  <td>{{ signal.reason }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if analysis.original_codes or analysis.uploaded_codes %}
+        <div class="mt-4">
+          <div class="info-label">Decoded QR / Barcode Payloads</div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="small text-info mb-1">Stored</div>
+              <pre class="small bg-black bg-opacity-10 p-2 rounded-2 mb-0">{{ analysis.original_codes | join('\n') }}</pre>
+            </div>
+            <div class="col-md-6">
+              <div class="small text-info mb-1">Uploaded</div>
+              <pre class="small bg-black bg-opacity-10 p-2 rounded-2 mb-0">{{ analysis.uploaded_codes | join('\n') }}</pre>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if analysis.reasons %}
+        <div class="mt-4">
+          <div class="info-label">Reason{% if analysis.reasons|length > 1 %}s{% endif %}</div>
+          <ul class="mb-0">
+            {% for reason in analysis.reasons %}
+            <li class="small text-light mb-1">{{ reason }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if analysis.metadata_changed %}
+        <div class="mt-4">
+          <div class="info-label">Metadata Differences</div>
+          <div class="table-responsive">
+            <table class="table table-dark table-striped table-sm mb-0">
+              <thead>
+                <tr>
+                  <th>Field</th>
+                  <th>Stored</th>
+                  <th>Uploaded</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for key, change in analysis.metadata_diff.items() %}
+                <tr>
+                  <td>{{ key }}</td>
+                  <td>{{ change.stored }}</td>
+                  <td>{{ change.uploaded }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <h5 class="text-warning mb-3"><i class="fas fa-code-compare me-2"></i>Changed Sections</h5>
+        <div class="row g-3 mb-3">
+          <div class="col-md-4">
+            <div class="p-2 rounded-2 border border-success border-opacity-50">
+              <div class="small text-success fw-bold">Added Sections</div>
+              <div class="h5 mb-0">{{ analysis.changed_sections.totals.added }}</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-2 rounded-2 border border-danger border-opacity-50">
+              <div class="small text-danger fw-bold">Removed Sections</div>
+              <div class="h5 mb-0">{{ analysis.changed_sections.totals.removed }}</div>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="p-2 rounded-2 border border-warning border-opacity-50">
+              <div class="small text-warning fw-bold">Modified Sections</div>
+              <div class="h5 mb-0">{{ analysis.changed_sections.totals.modified }}</div>
+            </div>
+          </div>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="info-label text-success">Added Content</div>
+            {% if analysis.changed_sections.added %}
+              {% for item in analysis.changed_sections.added %}
+              <pre class="small bg-black bg-opacity-10 p-2 rounded-2 mb-2 border border-success border-opacity-25">Line {{ item.line_start }}:
+{{ item.text }}</pre>
+              {% endfor %}
+            {% else %}
+              <div class="small text-muted">No added text detected.</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <div class="info-label text-danger">Removed Content</div>
+            {% if analysis.changed_sections.removed %}
+              {% for item in analysis.changed_sections.removed %}
+              <pre class="small bg-black bg-opacity-10 p-2 rounded-2 mb-2 border border-danger border-opacity-25">Line {{ item.line_start }}:
+{{ item.text }}</pre>
+              {% endfor %}
+            {% else %}
+              <div class="small text-muted">No removed text detected.</div>
+            {% endif %}
+          </div>
+          <div class="col-md-4">
+            <div class="info-label text-warning">Modified Content</div>
+            {% if analysis.changed_sections.modified %}
+              {% for item in analysis.changed_sections.modified %}
+              <pre class="small bg-black bg-opacity-10 p-2 rounded-2 mb-2 border border-warning border-opacity-25">Original (line {{ item.original_line_start }}):
+{{ item.original_text }}
+
+Uploaded (line {{ item.uploaded_line_start }}):
+{{ item.uploaded_text }}</pre>
+              {% endfor %}
+            {% else %}
+              <div class="small text-muted">No modified text detected.</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="mt-3">
+          <div class="info-label">Unified Diff</div>
+          <pre class="small bg-black bg-opacity-10 p-3 rounded-2 mb-0">{{ analysis.diff_text }}</pre>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="d-flex gap-3 flex-wrap">
+        <a href="/verify" class="btn btn-success px-4"><i class="fas fa-redo me-2"></i>Verify Another</a>
+        <a href="/dashboard" class="btn btn-outline-info px-4"><i class="fas fa-gauge-high me-2"></i>Back to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

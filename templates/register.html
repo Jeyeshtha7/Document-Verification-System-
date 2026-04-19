@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Register Document — SecureDoc{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+
+      <div class="page-header mb-4">
+        <h2 class="text-white"><i class="fas fa-file-upload me-2 text-info"></i>Register Document</h2>
+        <p class="text-muted">Upload verified personal, professional, or academic documents to store tamper-proof fingerprints.</p>
+      </div>
+
+      <div class="card-dark p-4 rounded-3">
+        <form method="POST" enctype="multipart/form-data" id="registerForm">
+
+          <!-- Document Upload -->
+          <div class="mb-4">
+            <label class="form-label text-light fw-semibold">
+              <i class="fas fa-file me-1 text-info"></i>Original Verified Document
+            </label>
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" name="document" id="docFile" class="upload-input" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" required>
+              <div class="upload-icon"><i class="fas fa-cloud-upload-alt fa-3x text-info"></i></div>
+              <div class="upload-text">Drag &amp; drop or <span class="text-info">browse</span></div>
+              <div class="upload-hint text-muted small">PDF, DOC, DOCX, PNG, JPG, TXT — max 16 MB</div>
+              <div id="fileName" class="mt-2 text-success fw-bold d-none"></div>
+            </div>
+          </div>
+
+          <!-- Student Info -->
+          <div class="mb-3">
+            <label class="form-label text-light fw-semibold">
+              <i class="fas fa-layer-group me-1 text-info"></i>Document Category <span class="text-danger">*</span>
+            </label>
+            <select name="document_category" class="form-select form-dark" required>
+              <option value="Academic">Academic</option>
+              <option value="Professional">Professional</option>
+              <option value="Personal">Personal</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light fw-semibold">
+              <i class="fas fa-user me-1 text-info"></i>Student Name <span class="text-danger">*</span>
+            </label>
+            <input type="text" name="student_name" class="form-control form-dark" placeholder="e.g. Rahul Sharma" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light fw-semibold">
+              <i class="fas fa-graduation-cap me-1 text-info"></i>Degree / Certificate <span class="text-danger">*</span>
+            </label>
+            <input type="text" name="degree" class="form-control form-dark" placeholder="e.g. B.Tech Computer Engineering" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light fw-semibold">
+              <i class="fas fa-university me-1 text-info"></i>Issuing Institution <span class="text-danger">*</span>
+            </label>
+            <input type="text" name="institution" class="form-control form-dark" placeholder="e.g. Mumbai University" required>
+          </div>
+
+          <!-- Encryption Policy -->
+          <div class="mb-4">
+            <div class="option-toggle p-3 rounded-2 border border-secondary">
+              <div class="text-light">
+                <i class="fas fa-lock me-1 text-success"></i>
+                <strong>AES-256-CBC encryption is mandatory</strong>
+                <span class="badge bg-success ms-2">Always ON</span>
+              </div>
+              <small class="text-muted">Every registered document is encrypted and stored as an encrypted file.</small>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-info btn-lg w-100 fw-bold" id="submitBtn">
+            <i class="fas fa-shield-alt me-2"></i>Register &amp; Mint to Blockchain
+          </button>
+        </form>
+      </div>
+
+      <!-- Info box -->
+      <div class="info-box mt-4 p-3 rounded-2 border border-info border-opacity-25">
+        <h6 class="text-info mb-2"><i class="fas fa-info-circle me-1"></i>What happens when you register?</h6>
+        <ul class="small text-muted mb-0">
+          <li>SHA-256 hash computed from your file bytes</li>
+          <li>Hash signed with RSA-2048 private key</li>
+          <li>HMAC-SHA256 tag added for integrity</li>
+          <li>A new block mined (Proof of Work) and appended to the blockchain</li>
+          <li>Document content never leaves your browser unencrypted</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+const zone = document.getElementById('uploadZone');
+const inp  = document.getElementById('docFile');
+const name = document.getElementById('fileName');
+const btn  = document.getElementById('submitBtn');
+
+inp.addEventListener('change', () => {
+  if (inp.files[0]) {
+    name.textContent = '✔ ' + inp.files[0].name;
+    name.classList.remove('d-none');
+  }
+});
+
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-over');
+  inp.files = e.dataTransfer.files;
+  if (inp.files[0]) { name.textContent = '✔ ' + inp.files[0].name; name.classList.remove('d-none'); }
+});
+
+document.getElementById('registerForm').addEventListener('submit', () => {
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Mining block…';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Login — SecureDoc{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-5">
+      <div class="card-dark p-4 rounded-3">
+        <h2 class="text-white mb-3"><i class="fas fa-sign-in-alt me-2 text-info"></i>Login</h2>
+        <p class="text-muted">Sign in with an institutional role to continue.</p>
+        <form method="POST">
+          <div class="mb-3">
+            <label class="form-label text-light">Username</label>
+            <input type="text" name="username" class="form-control form-dark" placeholder="admin or verifier" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-light">Password</label>
+            <input type="password" name="password" class="form-control form-dark" placeholder="Enter password" required>
+          </div>
+          <button type="submit" class="btn btn-info btn-lg w-100">Sign In</button>
+        </form>
+      </div>
+      <div class="info-box mt-4 p-3 rounded-2 border border-info border-opacity-25">
+        <h6 class="text-info mb-2"><i class="fas fa-info-circle me-1"></i>Demo credentials</h6>
+        <p class="small text-muted mb-1"><strong>Admin:</strong> admin / Admin@123</p>
+        <p class="small text-muted mb-0"><strong>Verifier:</strong> verifier / Verifier@123</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

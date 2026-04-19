@@ -1,0 +1,16 @@
+{
+  "users": [
+    {
+      "username": "admin",
+      "role": "Admin",
+      "password_hash": "CdFU11iMhWUTC+2OcV8J6RLLxfSMMMdQsAZcVcXw5No=",
+      "salt": "Bc8g6Ra07CBCE1AI3ysHwQ=="
+    },
+    {
+      "username": "verifier",
+      "role": "Verifier",
+      "password_hash": "ljfXRSvo5I7iGpfwqrGBMy0aIZpfSHK9M6yefvJti6c=",
+      "salt": "72IK0mUrQbmOvC3/h2Rppg=="
+    }
+  ]
+}

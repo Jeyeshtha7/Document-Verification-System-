@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Verify Document — SecureDoc{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+
+      <div class="page-header mb-4">
+        <h2 class="text-white"><i class="fas fa-search-plus me-2 text-success"></i>Verify Document</h2>
+        <p class="text-muted">Upload a document to instantly check whether it is genuine or has been tampered with.</p>
+      </div>
+
+      <div class="card-dark p-4 rounded-3">
+        <form method="POST" enctype="multipart/form-data" id="verifyForm">
+          <div class="mb-4">
+            <label class="form-label text-light fw-semibold">
+              <i class="fas fa-database me-1 text-success"></i>Select Registered Original <span class="text-danger">*</span>
+            </label>
+            <select name="registered_document_hash" class="form-select form-dark" required>
+              <option value="">-- Select original document --</option>
+              {% for doc in registered_documents %}
+              <option value="{{ doc.hash }}">
+                {{ doc.name }} | {{ doc.student_name }} | {{ doc.degree }} | {{ doc.category }} | Block #{{ doc.block_index }}
+              </option>
+              {% endfor %}
+            </select>
+            {% if registered_documents %}
+            <small class="text-muted">Verifier must select the original registered document before uploading received file.</small>
+            {% else %}
+            <small class="text-danger">No registered documents found. Ask Admin to register originals first.</small>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-light fw-semibold">
+              <i class="fas fa-file me-1 text-success"></i>Document to Verify
+            </label>
+            <div class="upload-zone" id="uploadZone">
+              <input type="file" name="document" id="docFile" class="upload-input" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.txt" required>
+              <div class="upload-icon"><i class="fas fa-search fa-3x text-success"></i></div>
+              <div class="upload-text">Drag &amp; drop or <span class="text-success">browse</span></div>
+              <div class="upload-hint text-muted small">Upload the document you received to check its authenticity</div>
+              <div id="fileName" class="mt-2 text-success fw-bold d-none"></div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-success btn-lg w-100 fw-bold" id="submitBtn">
+            <i class="fas fa-shield-alt me-2"></i>Verify Authenticity
+          </button>
+        </form>
+      </div>
+
+      <div class="info-box mt-4 p-3 rounded-2 border border-success border-opacity-25">
+        <h6 class="text-success mb-2"><i class="fas fa-info-circle me-1"></i>How verification works</h6>
+        <ul class="small text-muted mb-0">
+          <li>SHA-256 hash is computed from your uploaded file</li>
+          <li>Hash is searched across every block in the blockchain</li>
+          <li>RSA signature verified with institution's public key</li>
+          <li>HMAC integrity tag re-validated</li>
+          <li>Any modification = different hash = instant detection</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% block scripts %}
+<script>
+const zone = document.getElementById('uploadZone');
+const inp  = document.getElementById('docFile');
+const name = document.getElementById('fileName');
+const btn  = document.getElementById('submitBtn');
+
+inp.addEventListener('change', () => {
+  if (inp.files[0]) { name.textContent = '✔ ' + inp.files[0].name; name.classList.remove('d-none'); }
+});
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-over');
+  inp.files = e.dataTransfer.files;
+  if (inp.files[0]) { name.textContent = '✔ ' + inp.files[0].name; name.classList.remove('d-none'); }
+});
+document.getElementById('verifyForm').addEventListener('submit', () => {
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Verifying…';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}
+{% endblock %}

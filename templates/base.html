@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}SecureDoc Verify{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg navbar-dark sticky-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">
+      <i class="fas fa-shield-alt me-2 text-info"></i>SecureDoc<span class="text-info">Verify</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navLinks">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navLinks">
+      <ul class="navbar-nav ms-auto gap-1">
+        <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/explorer"><i class="fas fa-cubes me-1"></i>Blockchain</a></li>
+        {% if session.logged_in %}
+          {% if session.role == 'Admin' %}
+            <li class="nav-item"><a class="nav-link" href="/register"><i class="fas fa-file-upload me-1"></i>Register</a></li>
+            <li class="nav-item"><a class="nav-link" href="/audit"><i class="fas fa-clipboard-list me-1"></i>Audit</a></li>
+          {% elif session.role == 'Verifier' %}
+            <li class="nav-item"><a class="nav-link" href="/verify"><i class="fas fa-search-plus me-1"></i>Verify</a></li>
+          {% endif %}
+          <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-user-circle me-1"></i>{{ session.username }}</a></li>
+          <li class="nav-item"><a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
+        {% else %}
+          <li class="nav-item"><a class="nav-link" href="/login"><i class="fas fa-sign-in-alt me-1"></i>Login</a></li>
+        {% endif %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <i class="fas fa-flask me-1"></i>Demos
+          </a>
+          <ul class="dropdown-menu dropdown-menu-dark">
+            <li><a class="dropdown-item" href="/demo/hash"><i class="fas fa-hashtag me-2"></i>SHA-256 Live</a></li>
+            <li><a class="dropdown-item" href="/demo/tamper"><i class="fas fa-virus me-2"></i>Tamper Simulator</a></li>
+            <li><a class="dropdown-item" href="/demo/encrypt"><i class="fas fa-lock me-2"></i>AES Encryption</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mt-3">
+      {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }} alert-dismissible fade show" role="alert">
+          {{ msg }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<!-- MAIN CONTENT -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<!-- FOOTER -->
+<footer class="footer mt-5 py-4">
+  <div class="container text-center">
+    <p class="mb-1 text-muted">
+      <i class="fas fa-shield-alt me-1 text-info"></i>
+      <strong>SecureDoc Verification System</strong> &mdash; Cybersecurity &amp; Blockchain Project
+    </p>
+    <p class="small text-muted mb-0">
+      SHA-256 &bull; RSA-2048 &bull; AES-256 &bull; HMAC &bull; Blockchain &bull; Merkle Tree &bull; Proof of Work
+    </p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Blockchain Explorer — SecureDoc{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+
+  <div class="page-header mb-4">
+    <h2 class="text-white"><i class="fas fa-cubes me-2 text-primary"></i>Blockchain Explorer</h2>
+    <p class="text-muted">View every block in the chain. Each block is cryptographically linked to the previous.</p>
+  </div>
+
+  <!-- CHAIN STATUS -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+      <div class="stat-card text-center">
+        <div class="stat-number text-info">{{ stats.total_blocks }}</div>
+        <div class="stat-label">Total Blocks</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="stat-card text-center">
+        <div class="stat-number text-success">{{ stats.total_documents }}</div>
+        <div class="stat-label">Documents</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="stat-card text-center">
+        <div class="stat-number text-warning">{{ stats.difficulty }}</div>
+        <div class="stat-label">Difficulty</div>
+      </div>
+    </div>
+    <div class="col-md-3 col-6">
+      <div class="stat-card text-center">
+        <div class="stat-number {{ 'text-success' if is_valid else 'text-danger' }}">
+          {{ '✔' if is_valid else '✗' }}
+        </div>
+        <div class="stat-label">Chain Integrity</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VALIDATION RESULT -->
+  <div class="alert alert-{{ 'success' if is_valid else 'danger' }} mb-4">
+    <i class="fas fa-{{ 'check' if is_valid else 'exclamation-triangle' }}-circle me-2"></i>
+    <strong>Chain Validation:</strong>
+    {% for m in messages %} {{ m }} {% endfor %}
+    <a href="/api/validate" class="btn btn-sm btn-outline-light float-end" target="_blank">
+      <i class="fas fa-code me-1"></i>JSON API
+    </a>
+  </div>
+
+  <!-- BLOCKS -->
+  {% for block in chain | reverse %}
+  <div class="block-card mb-3">
+    <!-- Block Header -->
+    <div class="block-header d-flex justify-content-between align-items-center p-3 rounded-top"
+         data-bs-toggle="collapse" data-bs-target="#block{{ block.index }}"
+         style="cursor:pointer">
+      <div class="d-flex align-items-center gap-3">
+        {% if block.index == 0 %}
+          <span class="badge bg-warning text-dark fs-6 px-3">GENESIS</span>
+        {% else %}
+          <span class="badge bg-primary fs-6 px-3">#{{ block.index }}</span>
+        {% endif %}
+        <div>
+          <div class="text-white fw-semibold small">{{ block.hash[:32] }}…</div>
+          <div class="text-muted x-small">{{ block.timestamp[:19].replace('T',' ') }} UTC &bull; Nonce: {{ block.nonce }}</div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-secondary">{{ block.transactions | length }} tx</span>
+        <i class="fas fa-chevron-down text-muted"></i>
+      </div>
+    </div>
+
+    <!-- Block Body -->
+    <div class="collapse {% if loop.first %}show{% endif %}" id="block{{ block.index }}">
+      <div class="block-body p-3">
+
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            <div class="info-label">Block Hash <span class="badge bg-info text-dark ms-1">SHA-256</span></div>
+            <div class="hash-display">{{ block.hash }}</div>
+          </div>
+          <div class="col-12">
+            <div class="info-label">Previous Hash <span class="badge bg-secondary ms-1">Chain Link</span></div>
+            <div class="hash-display text-secondary">{{ block.previous_hash }}</div>
+          </div>
+          <div class="col-12">
+            <div class="info-label">Merkle Root <span class="badge bg-warning text-dark ms-1">Merkle Tree</span></div>
+            <div class="hash-display text-warning">{{ block.merkle_root }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-label">Nonce (PoW)</div>
+            <div class="info-value text-warning">{{ block.nonce }}</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-label">Difficulty</div>
+            <div class="info-value">{{ block.difficulty }} leading zeros</div>
+          </div>
+          <div class="col-sm-4">
+            <div class="info-label">Timestamp</div>
+            <div class="info-value small">{{ block.timestamp[:19].replace('T',' ') }}</div>
+          </div>
+        </div>
+
+        <!-- Transactions -->
+        <div class="info-label mb-2">Transactions ({{ block.transactions | length }})</div>
+        {% for tx in block.transactions %}
+        <div class="tx-card p-3 mb-2 rounded-2">
+          {% if tx.get('document_hash') %}
+            <div class="row g-2">
+              <div class="col-sm-6">
+                <div class="x-small text-muted">Student</div>
+                <div class="text-white fw-semibold">{{ tx.student_name }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="x-small text-muted">Degree</div>
+                <div class="text-white">{{ tx.degree }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="x-small text-muted">Institution</div>
+                <div class="text-white">{{ tx.institution }}</div>
+              </div>
+              <div class="col-sm-6">
+                <div class="x-small text-muted">File</div>
+                <div class="text-white">{{ tx.document_name }}</div>
+              </div>
+              <div class="col-12">
+                <div class="x-small text-muted">SHA-256 Hash</div>
+                <div class="hash-display text-info">{{ tx.document_hash }}</div>
+              </div>
+              <div class="col-12">
+                <div class="x-small text-muted">RSA Signature (truncated)</div>
+                <div class="hash-display text-success">{{ tx.signature[:64] }}…</div>
+              </div>
+              {% if tx.encrypted %}
+              <div class="col-12">
+                <span class="badge bg-success"><i class="fas fa-lock me-1"></i>AES-256 Encrypted</span>
+              </div>
+              {% endif %}
+            </div>
+          {% else %}
+            <div class="text-muted"><i class="fas fa-star me-1"></i>{{ tx.message }}</div>
+          {% endif %}
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+
+  {% if not loop.last %}
+  <div class="chain-link text-center text-muted mb-1">
+    <i class="fas fa-arrow-up"></i> linked via previous_hash
+  </div>
+  {% endif %}
+  {% endfor %}
+
+</div>
+{% endblock %}

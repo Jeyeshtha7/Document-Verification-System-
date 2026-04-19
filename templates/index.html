@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}Home — SecureDoc Verify{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero-section text-white py-5">
+  <div class="container py-4">
+    <div class="row align-items-center">
+      <div class="col-lg-7">
+        <div class="badge bg-info text-dark mb-3 px-3 py-2 rounded-pill">
+          <i class="fas fa-graduation-cap me-1"></i> Cybersecurity &amp; Blockchain Project
+        </div>
+        <h1 class="display-4 fw-bold mb-3">
+          Secure Academic<br>
+          <span class="gradient-text">Document Verification</span>
+        </h1>
+        <p class="lead mb-4 text-light">
+          A tamper-proof system that uses <strong>SHA-256 hashing</strong>,
+          <strong>RSA digital signatures</strong>, <strong>AES-256 encryption</strong>,
+          and a <strong>Blockchain with Proof of Work</strong> to register and verify
+          academic certificates.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="/register" class="btn btn-info btn-lg px-4 fw-bold">
+            <i class="fas fa-file-upload me-2"></i>Register Document
+          </a>
+          <a href="/verify" class="btn btn-outline-light btn-lg px-4">
+            <i class="fas fa-search-plus me-2"></i>Verify Document
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5 d-none d-lg-block text-center">
+        <div class="hero-shield-wrap">
+          <i class="fas fa-shield-alt hero-shield"></i>
+          <div class="orbit orbit-1"><i class="fas fa-lock"></i></div>
+          <div class="orbit orbit-2"><i class="fas fa-cubes"></i></div>
+          <div class="orbit orbit-3"><i class="fas fa-key"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE STATS -->
+<section class="py-4 bg-dark border-bottom border-secondary">
+  <div class="container">
+    <div class="row g-3 text-center">
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-number text-info">{{ stats.total_blocks }}</div>
+          <div class="stat-label">Blocks in Chain</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-number text-success">{{ stats.total_documents }}</div>
+          <div class="stat-label">Documents Registered</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-number text-warning">{{ stats.difficulty }}</div>
+          <div class="stat-label">PoW Difficulty</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="stat-card">
+          <div class="stat-number text-danger">2048</div>
+          <div class="stat-label">RSA Key Bits</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="section-title text-center mb-5">How It Works</h2>
+    <div class="row g-4">
+
+      <!-- Phase 1 -->
+      <div class="col-md-6">
+        <div class="phase-card h-100">
+          <div class="phase-header bg-info bg-opacity-10 border border-info rounded-top p-3">
+            <h5 class="mb-0 text-info"><i class="fas fa-upload me-2"></i>Phase 1 — Document Registration</h5>
+          </div>
+          <div class="phase-body p-3 border border-info border-top-0 rounded-bottom">
+            <div class="step-item"><span class="step-num">1</span> Upload original academic document</div>
+            <div class="step-item"><span class="step-num">2</span> SHA-256 hash is computed (64-char fingerprint)</div>
+            <div class="step-item"><span class="step-num">3</span> Institution signs hash with RSA-2048 private key</div>
+            <div class="step-item"><span class="step-num">4</span> HMAC tag generated for integrity</div>
+            <div class="step-item"><span class="step-num">5</span> (Optional) File encrypted with AES-256-CBC</div>
+            <div class="step-item"><span class="step-num">6</span> Record mined into Blockchain (Proof of Work)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="col-md-6">
+        <div class="phase-card h-100">
+          <div class="phase-header bg-success bg-opacity-10 border border-success rounded-top p-3">
+            <h5 class="mb-0 text-success"><i class="fas fa-check-circle me-2"></i>Phase 2 — Document Verification</h5>
+          </div>
+          <div class="phase-body p-3 border border-success border-top-0 rounded-bottom">
+            <div class="step-item"><span class="step-num success">1</span> Verifier uploads document to check</div>
+            <div class="step-item"><span class="step-num success">2</span> SHA-256 hash re-computed from uploaded file</div>
+            <div class="step-item"><span class="step-num success">3</span> Hash searched across entire blockchain</div>
+            <div class="step-item"><span class="step-num success">4</span> RSA signature verified with public key</div>
+            <div class="step-item"><span class="step-num success">5</span> HMAC integrity re-checked</div>
+            <div class="step-item"><span class="step-num success">6</span> Result: Original ✔ or Tampered ✗</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CONCEPTS GRID -->
+<section class="py-5 bg-dark">
+  <div class="container">
+    <h2 class="section-title text-center mb-5">Concepts Implemented</h2>
+    <div class="row g-3">
+
+      <div class="col-sm-6 col-lg-4">
+        <div class="concept-card">
+          <div class="concept-icon text-warning"><i class="fas fa-hashtag fa-2x"></i></div>
+          <h6 class="text-white mt-2">SHA-256 Hashing</h6>
+          <p class="small text-muted mb-0">One-way function producing a 256-bit fingerprint. Avalanche effect — 1 bit change → 50% of hash changes.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-4">
+        <div class="concept-card">
+          <div class="concept-icon text-info"><i class="fas fa-signature fa-2x"></i></div>
+          <h6 class="text-white mt-2">RSA Digital Signatures</h6>
+          <p class="small text-muted mb-0">2048-bit asymmetric keys. Private key signs; public key verifies. Ensures authenticity &amp; non-repudiation.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-4">
+        <div class="concept-card">
+          <div class="concept-icon text-success"><i class="fas fa-lock fa-2x"></i></div>
+          <h6 class="text-white mt-2">AES-256-CBC Encryption</h6>
+          <p class="small text-muted mb-0">256-bit symmetric encryption. Random IV per operation. PKCS#7 padding. Protects stored documents.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-4">
+        <div class="concept-card">
+          <div class="concept-icon text-danger"><i class="fas fa-tag fa-2x"></i></div>
+          <h6 class="text-white mt-2">HMAC-SHA256</h6>
+          <p class="small text-muted mb-0">Keyed hash for message authentication. Prevents forgery even when hash algorithm is known.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-4">
+        <div class="concept-card">
+          <div class="concept-icon text-primary"><i class="fas fa-cubes fa-2x"></i></div>
+          <h6 class="text-white mt-2">Blockchain</h6>
+          <p class="small text-muted mb-0">Each block links to previous via hash. Changing one block breaks all subsequent hashes — immutable ledger.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-4">
+        <div class="concept-card">
+          <div class="concept-icon text-orange"><i class="fas fa-hammer fa-2x"></i></div>
+          <h6 class="text-white mt-2">Proof of Work</h6>
+          <p class="small text-muted mb-0">Mining finds a nonce so block hash starts with N zeros. Makes tampering computationally expensive.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-4">
+        <div class="concept-card">
+          <div class="concept-icon text-purple"><i class="fas fa-sitemap fa-2x"></i></div>
+          <h6 class="text-white mt-2">Merkle Tree</h6>
+          <p class="small text-muted mb-0">Binary hash tree of transactions. Root stored in block header — tamper-proof transaction summary.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-4">
+        <div class="concept-card">
+          <div class="concept-icon text-teal"><i class="fas fa-link fa-2x"></i></div>
+          <h6 class="text-white mt-2">Chain Validation</h6>
+          <p class="small text-muted mb-0">Full chain re-validated on demand — detects hash corruption, previous-hash mismatch, or PoW violation.</p>
+        </div>
+      </div>
+
+      <div class="col-sm-6 col-lg-4">
+        <div class="concept-card">
+          <div class="concept-icon text-secondary"><i class="fas fa-code fa-2x"></i></div>
+          <h6 class="text-white mt-2">Base64 Encoding</h6>
+          <p class="small text-muted mb-0">Binary-safe transport for signatures, ciphertext, and IVs. Ensures JSON compatibility of cryptographic data.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-5 text-center">
+  <div class="container">
+    <h3 class="text-white mb-3">Try the Interactive Demos</h3>
+    <p class="text-muted mb-4">See how SHA-256 and AES-256 work in real time</p>
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+      <a href="/demo/hash"    class="btn btn-outline-warning px-4"><i class="fas fa-hashtag me-2"></i>SHA-256 Demo</a>
+      <a href="/demo/tamper"  class="btn btn-outline-danger  px-4"><i class="fas fa-virus me-2"></i>Tamper Demo</a>
+      <a href="/demo/encrypt" class="btn btn-outline-success px-4"><i class="fas fa-lock me-2"></i>AES Demo</a>
+      <a href="/explorer"     class="btn btn-outline-info   px-4"><i class="fas fa-cubes me-2"></i>Blockchain Explorer</a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

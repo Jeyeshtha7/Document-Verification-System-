@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - SecureDoc{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row gy-4">
+    <div class="col-lg-8">
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <h2 class="text-white"><i class="fas fa-user-circle me-2 text-info"></i>Dashboard</h2>
+        <p class="text-muted">Welcome, <strong>{{ session.username }}</strong>. Your current role is <span class="badge bg-info">{{ session.role }}</span>.</p>
+        {% if session.role == 'Admin' %}
+          <p class="text-muted">As an Admin, you can register verified documents, view audit log entries, and manage institution records.</p>
+          <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-info" href="/register"><i class="fas fa-file-upload me-2"></i>Register Document</a>
+            <a class="btn btn-outline-light" href="/audit"><i class="fas fa-clipboard-list me-2"></i>View Audit Log</a>
+          </div>
+        {% else %}
+          <p class="text-muted">As a Verifier, you can upload received documents and verify whether they are original or tampered.</p>
+          <a class="btn btn-success" href="/verify"><i class="fas fa-search-plus me-2"></i>Verify Document</a>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="card-dark p-4 rounded-3">
+        <h5 class="text-info mb-3"><i class="fas fa-chart-line me-2"></i>System Summary</h5>
+        <div class="mb-2"><strong>Blocks in Chain:</strong> {{ stats.total_blocks }}</div>
+        <div class="mb-2"><strong>Registered Docs:</strong> {{ stats.total_documents }}</div>
+        <div class="mb-2"><strong>PoW Difficulty:</strong> {{ stats.difficulty }}</div>
+        <div class="mb-2"><strong>Latest Block Hash:</strong></div>
+        <div class="small text-muted hash-display" style="word-break: break-all;">{{ stats.last_hash }}</div>
+      </div>
+    </div>
+  </div>
+
+  {% if session.role == 'Admin' and logs %}
+  <div class="row mt-4">
+    <div class="col-lg-12">
+      <div class="card-dark p-4 rounded-3">
+        <h5 class="text-info mb-3"><i class="fas fa-history me-2"></i>Recent Audit Actions</h5>
+        <div class="table-responsive">
+          <table class="table table-dark table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Role</th>
+                <th>Action</th>
+                <th>Document</th>
+                <th>Status</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in logs %}
+              <tr>
+                <td>{{ format_timestamp(entry.timestamp) }}</td>
+                <td>{{ entry.user }}</td>
+                <td>{{ entry.role }}</td>
+                <td>{{ entry.action }}</td>
+                <td>{{ entry.document_name or '-' }}</td>
+                <td>{{ entry.status }}</td>
+                <td>
+                  <form method="POST" action="/audit/delete" onsubmit="return confirm('Delete this log entry?');">
+                    <input type="hidden" name="entry_id" value="{{ entry.entry_id }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if session.role == 'Admin' and documents %}
+  <div class="row mt-4">
+    <div class="col-lg-12">
+      <div class="card-dark p-4 rounded-3">
+        <h5 class="text-warning mb-3"><i class="fas fa-folder-minus me-2"></i>Registered Documents (Delete / Disable)</h5>
+        <div class="table-responsive">
+          <table class="table table-dark table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Student</th>
+                <th>Institution</th>
+                <th>Status</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for doc in documents %}
+              <tr>
+                <td>{{ doc.name }}</td>
+                <td>{{ doc.category }}</td>
+                <td>{{ doc.student_name }}</td>
+                <td>{{ doc.institution }}</td>
+                <td>
+                  {% if doc.active %}
+                    <span class="badge bg-success">Active</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Deleted</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if doc.active %}
+                  <form method="POST" action="/documents/revoke" onsubmit="return confirm('Delete this registered document from active verification list?');">
+                    <input type="hidden" name="document_hash" value="{{ doc.hash }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="fas fa-trash me-1"></i>Delete
+                    </button>
+                  </form>
+                  {% else %}
+                    <span class="small text-muted">Already deleted</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if session.role == 'Verifier' and logs %}
+  <div class="row mt-4">
+    <div class="col-lg-12">
+      <div class="card-dark p-4 rounded-3">
+        <h5 class="text-info mb-3"><i class="fas fa-list-check me-2"></i>My Verification History</h5>
+        <div class="table-responsive">
+          <table class="table table-dark table-striped align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Action</th>
+                <th>Document</th>
+                <th>Status</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in logs %}
+              <tr>
+                <td>{{ format_timestamp(entry.timestamp) }}</td>
+                <td>{{ entry.action }}</td>
+                <td>{{ entry.document_name or '-' }}</td>
+                <td>{{ entry.status }}</td>
+                <td>
+                  <form method="POST" action="/audit/delete" onsubmit="return confirm('Delete this log entry?');">
+                    <input type="hidden" name="entry_id" value="{{ entry.entry_id }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

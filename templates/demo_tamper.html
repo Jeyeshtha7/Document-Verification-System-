@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Tamper Simulator — SecureDoc{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="page-header mb-4">
+        <h2 class="text-white"><i class="fas fa-virus me-2 text-danger"></i>Tamper Simulator</h2>
+        <p class="text-muted">Enter two texts (original vs. modified) and see how even a tiny change produces a completely different hash — the <strong>Avalanche Effect</strong>.</p>
+      </div>
+
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <form method="POST">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label text-success fw-semibold">Original Document Text</label>
+              <textarea name="text1" class="form-control form-dark" rows="4" placeholder="Original content…">{{ result.text1 if result }}</textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-danger fw-semibold">Tampered Document Text</label>
+              <textarea name="text2" class="form-control form-dark" rows="4" placeholder="Modify even one character…">{{ result.text2 if result }}</textarea>
+            </div>
+          </div>
+          <button class="btn btn-danger w-100 mt-3">Compare Hashes</button>
+        </form>
+      </div>
+
+      {% if result %}
+      <div class="card-dark p-4 rounded-3 mb-4">
+        <h5 class="mb-3 {{ 'text-success' if result.match else 'text-danger' }}">
+          {% if result.match %}
+            ✅ Hashes MATCH — Documents are identical
+          {% else %}
+            ❌ Hashes DIFFER — Tampering Detected!
+          {% endif %}
+        </h5>
+
+        <div class="row g-3">
+          <div class="col-12">
+            <div class="info-label text-success">Original SHA-256</div>
+            <div class="hash-display-compare">
+              {% for i in range(64) %}
+                <span class="{{ 'diff-char' if result.hash1[i] != result.hash2[i] }}">{{ result.hash1[i] }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="info-label text-danger">Tampered SHA-256</div>
+            <div class="hash-display-compare">
+              {% for i in range(64) %}
+                <span class="{{ 'diff-char' if result.hash1[i] != result.hash2[i] }}">{{ result.hash2[i] }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        {% if not result.match %}
+        <div class="alert alert-danger mt-3">
+          <strong>{{ result.diff_chars }}/64 characters differ ({{ result.diff_percent }}%)</strong> — This is the Avalanche Effect.
+          Even a tiny text change results in a completely different hash.
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div class="info-box p-3 rounded-2 border border-danger border-opacity-25">
+        <h6 class="text-danger"><i class="fas fa-info-circle me-1"></i>Why this matters for document security</h6>
+        <p class="small text-muted mb-0">
+          In our system, if anyone modifies even a single character in a certificate — a grade, a name, a date —
+          the SHA-256 hash changes completely. When the modified document is uploaded for verification,
+          its hash won't match the stored blockchain hash, and verification fails instantly.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
