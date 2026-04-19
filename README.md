@@ -1,134 +1,56 @@
 # Document-Verification-System-
 
-##  Overview
+A blockchain-based system to verify the authenticity and integrity of academic documents using cryptographic techniques like hashing, encryption, and digital signatures.
 
-This project is a ** Document Verification System** that helps detect whether a document is **original or tampered**. It uses **SHA-256 hashing** to generate a unique fingerprint for each file and verifies authenticity through QR code scanning.
+## Overview
 
----
+This project ensures that uploaded documents are secure, verifiable, and tamper-proof by combining:
+
+Cryptography (SHA-256, RSA, AES)
+Blockchain technology
+Digital signatures
 
 ##  Features
+ SHA-256 hashing for integrity
+ RSA digital signatures for authentication
+ AES encryption for secure storage
+ Blockchain-based verification
+ Merkle Tree implementation
+ Proof of Work (PoW)
+ Multi-format document support (PDF, DOCX, Images, TXT)
+ Tamper detection system
 
-*  Upload documents (PDF/Image)
-*  Generate secure **SHA-256 hash**
-*  Create QR code linked to document data
-*  Scan QR code for verification
-*  Detect **original vs tampered files**
-*  Track scan attempts
-*  User authentication system (optional)
+ ### Tech Stack
+Backend: Python (Flask)
+Cryptography: hashlib, hmac, RSA, AES
+Blockchain: Custom implementation
+File Handling: PyPDF2, python-docx, OpenCV
 
----
+## Installation
+git clone <your-repo-url>
+cd secure_doc_verification
+python -m venv venv
+Activate environment
 
-##  Tech Stack
+Windows
 
-###  Backend
+venv\Scripts\activate
 
-* Python
-* Flask
+Mac/Linux
 
-###  Frontend
+source venv/bin/activate
+pip install -r requirements.txt
 
-* React.js
-* HTML, CSS
-
-###  Security
-
-* SHA-256 Hashing
-
-###  Libraries
-
-* hashlib (hash generation)
-* qrcode (QR generation)
-* sqlite3 (database)
-* os (file handling)
-
-###  Additional Tools
-
-* Node.js
-
-###  Database
-
-* SQLite
-
----
-
-##  How It Works
-
-1. User uploads a document
-2. System generates a **SHA-256 hash**
-3. QR code is created with document details
-4. Data is stored in database
-5. User scans QR code
-6. System compares stored hash with current file
-7. Result:
-
-   * ✅ Match → Original
-   * ❌ Mismatch → Tampered
-
----
-
-##  Project Structure
-
-```
-project/
-│
-├── backend/
-│   ├── app.py
-│   ├── verify.py
-│   ├── database.db
-│
-├── frontend/
-│   ├── React App
-│
-├── uploads/
-│   ├── stored documents
-│
-├── qr_codes/
-│   ├── generated QR images
-│
-├── server.js
-└── README.md
-```
-
----
-
-##  Installation & Setup
-
-### 1. Clone Repository
-
-```
-git clone <your-repo-link>
-cd project
-```
-
-### 2. Backend Setup
-
-```
-pip install flask qrcode
+##  Run the Application
 python app.py
-```
 
-### 3. Frontend Setup
+Open in browser:
 
-```
-cd frontend
-npm install
-npm start
-```
+http://127.0.0.1:5000/
 
-### 4. (Optional) Node Server
-
-```
-npm install
-node server.js
-```
-
----
-
-##  Use Cases
-
-*  Certificate verification (colleges)
-*  Official document validation
-*  Resume authenticity check
-*  Fraud detection systems
-
----
+### Workflow
+Upload document
+Generate SHA-256 hash
+Sign hash using RSA
+Store in blockchain
+Verify by comparing hashes and validating chain
